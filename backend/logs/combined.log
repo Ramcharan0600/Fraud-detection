@@ -1,0 +1,6 @@
+{"level":"info","message":"Connected to MongoDB","service":"fraud-detection-api","timestamp":"2026-04-28 23:07:33"}
+{"level":"info","message":"API running on http://localhost:5000","service":"fraud-detection-api","timestamp":"2026-04-28 23:07:33"}
+{"level":"info","message":"Connected to MongoDB","service":"fraud-detection-api","timestamp":"2026-04-28 23:09:06"}
+{"level":"info","message":"Connected to MongoDB","service":"fraud-detection-api","timestamp":"2026-04-28 23:14:29"}
+{"level":"info","message":"Connected to MongoDB","service":"fraud-detection-api","timestamp":"2026-04-28 23:14:59"}
+{"level":"info","message":"API running on http://localhost:5001","service":"fraud-detection-api","timestamp":"2026-04-28 23:14:59"}
