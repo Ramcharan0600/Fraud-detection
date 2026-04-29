@@ -41,7 +41,14 @@ export default function Dashboard() {
   useEffect(() => { load(); }, []);
 
   if (loading && pagination.currentPage === 1) {
-    return <div className="muted" style={{ padding: "40px", textAlign: "center" }}>Synchronizing Intelligence...</div>;
+    return (
+      <div className="container grid">
+        <div className="skeleton skeleton-card"></div>
+        <div className="skeleton skeleton-card"></div>
+        <div className="skeleton skeleton-card"></div>
+        <div className="skeleton skeleton-card"></div>
+      </div>
+    );
   }
 
   if (error && pagination.currentPage === 1) {
@@ -63,8 +70,8 @@ export default function Dashboard() {
           <h2 style={{ fontSize: "2rem", marginBottom: "8px" }}>Security Overview</h2>
           <p className="muted">Monitoring credit transactions with real-time AI classification.</p>
         </div>
-        <div style={{ color: "var(--success)", fontSize: "0.875rem", fontWeight: 700, display: "flex", alignItems: "center", gap: "6px" }}>
-          <div style={{ width: "8px", height: "8px", background: "var(--success)", borderRadius: "50%", boxShadow: "0 0 12px var(--success)" }}></div>
+        <div style={{ color: "var(--success)", fontSize: "0.875rem", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
+          <div className="status-indicator"></div>
           SYSTEM LIVE
         </div>
       </div>
@@ -113,22 +120,22 @@ export default function Dashboard() {
               <>
                 <div>
                   <div className="stat-label">Precision</div>
-                  <div className="stat-value" style={{ fontSize: "1.5rem" }}>{(metrics.precision*100).toFixed(1)}%</div>
+                  <div className="stat-value" style={{ fontSize: "1.5rem", color: "var(--text-heading)" }}>{(metrics.precision*100).toFixed(1)}%</div>
                   <div className="progress-bg" style={{ marginTop: "8px" }}><div className="progress-fill" style={{ width: `${metrics.precision*100}%`, background: "var(--primary-gradient)" }}></div></div>
                 </div>
                 <div>
                   <div className="stat-label">Recall</div>
-                  <div className="stat-value" style={{ fontSize: "1.5rem" }}>{(metrics.recall*100).toFixed(1)}%</div>
+                  <div className="stat-value" style={{ fontSize: "1.5rem", color: "var(--text-heading)" }}>{(metrics.recall*100).toFixed(1)}%</div>
                   <div className="progress-bg" style={{ marginTop: "8px" }}><div className="progress-fill" style={{ width: `${metrics.recall*100}%`, background: "var(--primary-gradient)" }}></div></div>
                 </div>
                 <div>
                   <div className="stat-label">F1 Score</div>
-                  <div className="stat-value" style={{ fontSize: "1.5rem" }}>{(metrics.f1*100).toFixed(1)}%</div>
+                  <div className="stat-value" style={{ fontSize: "1.5rem", color: "var(--text-heading)" }}>{(metrics.f1*100).toFixed(1)}%</div>
                   <div className="progress-bg" style={{ marginTop: "8px" }}><div className="progress-fill" style={{ width: `${metrics.f1*100}%`, background: "var(--primary-gradient)" }}></div></div>
                 </div>
                 <div>
                   <div className="stat-label">Accuracy</div>
-                  <div className="stat-value" style={{ fontSize: "1.5rem" }}>{(metrics.accuracy*100).toFixed(1)}%</div>
+                  <div className="stat-value" style={{ fontSize: "1.5rem", color: "var(--text-heading)" }}>{(metrics.accuracy*100).toFixed(1)}%</div>
                   <div className="progress-bg" style={{ marginTop: "8px" }}><div className="progress-fill" style={{ width: `${metrics.accuracy*100}%`, background: "var(--primary-gradient)" }}></div></div>
                 </div>
               </>
@@ -163,7 +170,7 @@ export default function Dashboard() {
               {items.map((t) => (
                 <tr key={t._id}>
                   <td className="muted" style={{ fontSize: "0.8rem" }}>{new Date(t.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td>
-                  <td style={{ fontWeight: 700, color: "#334155" }}>{t.merchant}</td>
+                  <td style={{ fontWeight: 700, color: "var(--text-main)" }}>{t.merchant}</td>
                   <td className="muted">{t.category}</td>
                   <td style={{ fontWeight: 800 }}>${(t.amount || 0).toFixed(2)}</td>
                   <td style={{ width: "160px" }}>

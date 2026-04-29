@@ -49,8 +49,8 @@ export default function Settings() {
             />
           </div>
 
-          <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "16px", marginBottom: "24px", border: "1px solid var(--border-color)" }}>
-            <h4 style={{ fontSize: "0.875rem", marginBottom: "16px", color: "#1e293b" }}>Home Base Coordinates</h4>
+          <div style={{ padding: "20px", background: "rgba(150, 150, 150, 0.05)", borderRadius: "16px", marginBottom: "24px", border: "1px solid var(--border-color)" }}>
+            <h4 style={{ fontSize: "0.875rem", marginBottom: "16px", color: "var(--text-heading)" }}>Home Base Coordinates</h4>
             <p className="muted" style={{ fontSize: "0.8rem", marginBottom: "20px" }}>
               The system uses these coordinates to calculate distance-based risk for non-online transactions.
             </p>
@@ -82,10 +82,10 @@ export default function Settings() {
         </form>
       </div>
 
-      <div className="card" style={{ borderLeft: "4px solid #6366f1" }}>
+      <div className="card" style={{ borderLeft: "4px solid var(--primary)" }}>
         <h3 style={{ fontSize: "1rem", marginBottom: "8px" }}>Security Context</h3>
         <p className="muted" style={{ fontSize: "0.875rem" }}>
-          Your home base is currently set to: <strong style={{ color: "#1e293b" }}>{(user?.homeLat || 0).toFixed(4)}, {(user?.homeLng || 0).toFixed(4)}</strong>. 
+          Your home base is currently set to: <strong style={{ color: "var(--text-heading)" }}>{(user?.homeLat || 0).toFixed(4)}, {(user?.homeLng || 0).toFixed(4)}</strong>. 
           Any physical transaction detected beyond a standard radius of this location will automatically trigger a higher risk variance in the neural assessment.
         </p>
       </div>

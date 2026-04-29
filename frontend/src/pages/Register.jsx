@@ -28,8 +28,8 @@ export default function Register() {
     <div className="auth-page">
       <div className="card auth-card">
         <div style={{ textAlign: "center", marginBottom: "40px" }}>
-          <div style={{ display: "inline-flex", padding: "12px", background: "rgba(99, 102, 241, 0.1)", borderRadius: "16px", marginBottom: "20px" }}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <div style={{ display: "inline-flex", padding: "12px", background: "rgba(150, 150, 150, 0.1)", borderRadius: "16px", marginBottom: "20px" }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
           </div>
           <h2 style={{ fontSize: "1.75rem", marginBottom: "8px" }}>Network Enrollment</h2>
           <p className="muted">Register as a new Security Analyst on the FraudGuard network.</p>

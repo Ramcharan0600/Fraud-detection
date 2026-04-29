@@ -28,9 +28,9 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const { data } = await api.post("/auth/login", { email, password });
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    setUser(data.user);
+    localStorage.setItem("token", data.data.token);
+    localStorage.setItem("user", JSON.stringify(data.data.user));
+    setUser(data.data.user);
   };
   
   const register = async (name, email, password) => {
@@ -41,14 +41,14 @@ export function AuthProvider({ children }) {
 
   const updateProfile = async (updates) => {
     const { data } = await api.put("/users/profile", updates);
-    localStorage.setItem("user", JSON.stringify(data));
-    setUser(data);
-    return data;
+    localStorage.setItem("user", JSON.stringify(data.data));
+    setUser(data.data);
+    return data.data;
   };
   const logout = () => {
     localStorage.clear();
     setUser(null);
   };
 
-  return <Ctx.Provider value={{ user, login, register, logout, loading }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ user, login, register, updateProfile, logout, loading }}>{children}</Ctx.Provider>;
 }

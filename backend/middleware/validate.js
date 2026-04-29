@@ -1,63 +1,93 @@
-// Input validation middleware
-const validateTransaction = (req, res, next) => {
-  const { amount, merchant, category, lat, lng } = req.body;
-  
-  // Check required fields
-  if (amount == null || !merchant || lat == null || lng == null) {
-    return res.status(400).json({ success: false, error: "Missing required fields: amount, merchant, lat, lng" });
-  }
+const { body, validationResult, query } = require("express-validator");
 
-  // Validate amount
-  if (typeof amount !== "number" || amount <= 0 || amount > 1000000) {
-    return res.status(400).json({ success: false, error: "Amount must be between 0 and 1,000,000" });
-  }
+// Validation chains for transaction creation
+const validateTransactionCreate = [
+  body("amount")
+    .isNumeric()
+    .withMessage("Amount must be a number")
+    .isFloat({ min: 0.01, max: 1000000 })
+    .withMessage("Amount must be between 0.01 and 1,000,000"),
+  body("merchant")
+    .trim()
+    .notEmpty()
+    .withMessage("Merchant name is required")
+    .isLength({ min: 1, max: 100 })
+    .withMessage("Merchant name must be 1-100 characters"),
+  body("lat")
+    .isFloat({ min: -90, max: 90 })
+    .withMessage("Latitude must be between -90 and 90"),
+  body("lng")
+    .isFloat({ min: -180, max: 180 })
+    .withMessage("Longitude must be between -180 and 180"),
+  body("category")
+    .optional()
+    .isIn(["grocery", "electronics", "travel", "gambling", "atm", "online", "other"])
+    .withMessage("Invalid category"),
+  body("isOnline")
+    .optional()
+    .isBoolean()
+    .withMessage("isOnline must be a boolean"),
+];
 
-  // Validate merchant name
-  if (typeof merchant !== "string" || merchant.trim().length === 0 || merchant.length > 100) {
-    return res.status(400).json({ success: false, error: "Merchant name must be 1-100 characters" });
-  }
+// Validation chains for authentication
+const validateRegister = [
+  body("email")
+    .isEmail()
+    .withMessage("Invalid email format")
+    .normalizeEmail(),
+  body("password")
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters")
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .withMessage("Password must contain uppercase, lowercase, and numbers"),
+  body("name")
+    .trim()
+    .notEmpty()
+    .withMessage("Name is required")
+    .isLength({ min: 2, max: 50 })
+    .withMessage("Name must be 2-50 characters"),
+];
 
-  // Validate coordinates
-  if (typeof lat !== "number" || lat < -90 || lat > 90) {
-    return res.status(400).json({ success: false, error: "Latitude must be between -90 and 90" });
-  }
+const validateLogin = [
+  body("email")
+    .isEmail()
+    .withMessage("Invalid email format")
+    .normalizeEmail(),
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required"),
+];
 
-  if (typeof lng !== "number" || lng < -180 || lng > 180) {
-    return res.status(400).json({ success: false, error: "Longitude must be between -180 and 180" });
-  }
+// Validation for pagination
+const validatePaginationQuery = [
+  query("page")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Page must be >= 1"),
+  query("limit")
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage("Limit must be between 1 and 100"),
+];
 
-  // Validate category if provided
-  const validCategories = ["grocery", "electronics", "travel", "gambling", "atm", "online", "other"];
-  if (req.body.category && !validCategories.includes(req.body.category)) {
-    return res.status(400).json({ success: false, error: `Category must be one of: ${validCategories.join(", ")}` });
+// Middleware to handle validation errors
+const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      error: "Validation failed",
+      details: errors.array().map(err => ({
+        field: err.param,
+        message: err.msg
+      }))
+    });
   }
-
   next();
 };
 
-const validateAuth = (req, res, next) => {
-  const { email, password, name } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ success: false, error: "Email and password required" });
-  }
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({ success: false, error: "Invalid email format" });
-  }
-
-  if (password.length < 8) {
-    return res.status(400).json({ success: false, error: "Password must be at least 8 characters" });
-  }
-
-  if (req.body.name && (typeof req.body.name !== "string" || req.body.name.trim().length === 0)) {
-    return res.status(400).json({ success: false, error: "Name must be a non-empty string" });
-  }
-
-  next();
-};
-
-const validatePagination = (req, res, next) => {
+// Pagination middleware
+const paginationMiddleware = (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 15;
 
@@ -74,7 +104,10 @@ const validatePagination = (req, res, next) => {
 };
 
 module.exports = {
-  validateTransaction,
-  validateAuth,
-  validatePagination,
+  validateTransactionCreate,
+  validateRegister,
+  validateLogin,
+  validatePaginationQuery,
+  handleValidationErrors,
+  paginationMiddleware,
 };

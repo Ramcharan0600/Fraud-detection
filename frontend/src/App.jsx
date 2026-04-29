@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "./context/AuthContext.jsx";
+import { useTheme } from "./context/ThemeContext.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
@@ -20,12 +21,19 @@ const Icons = {
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
   ),
   Guard: () => (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#6366f1" }}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--primary)" }}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+  ),
+  Sun: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+  ),
+  Moon: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
   )
 };
 
 function Sidebar() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const nav = useNavigate();
   const location = useLocation();
 
@@ -37,7 +45,7 @@ function Sidebar() {
     <div className="sidebar">
       <div className="nav-logo">
         <Icons.Guard />
-        <span style={{ background: "linear-gradient(to right, #fff, #94a3b8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>FraudGuard</span>
+        <span className="text-gradient">FraudGuard</span>
       </div>
       <div className="nav-links">
         <Link to="/" className={`nav-item ${isActive("/")}`}>
@@ -50,14 +58,19 @@ function Sidebar() {
           <Icons.Settings /> Settings
         </Link>
       </div>
-      <div style={{ marginTop: "auto", paddingTop: "24px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+      <div style={{ marginTop: "auto", paddingTop: "24px", borderTop: "1px solid var(--border-color)" }}>
         <div style={{ marginBottom: "16px", padding: "0 16px" }}>
-          <div style={{ color: "#fff", fontWeight: 700, fontSize: "0.9rem" }}>{user.name}</div>
+          <div style={{ color: "var(--text-heading)", fontWeight: 700, fontSize: "0.9rem" }}>{user.name}</div>
           <div style={{ color: "var(--sidebar-text)", fontSize: "0.75rem" }}>Security Analyst</div>
         </div>
-        <button className="btn ghost" style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff" }} onClick={() => { logout(); nav("/login"); }}>
-          <Icons.Logout /> Logout
-        </button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button className="btn ghost" style={{ flex: 1, justifyContent: "center", padding: "10px" }} onClick={toggleTheme}>
+            {theme === "light" ? <Icons.Moon /> : <Icons.Sun />}
+          </button>
+          <button className="btn ghost" style={{ flex: 3, justifyContent: "center", padding: "10px" }} onClick={() => { logout(); nav("/login"); }}>
+            <Icons.Logout /> Logout
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -79,7 +92,7 @@ function Layout({ children }) {
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="main-content"><div className="card">Syncing Security Protocols...</div></div>;
+  if (loading) return <div className="main-content"><div className="card skeleton skeleton-card" style={{ height: "400px" }}></div></div>;
   if (!user) return <Navigate to="/login" replace />;
   return children;
 }

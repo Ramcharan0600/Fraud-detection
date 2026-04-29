@@ -27,7 +27,7 @@ export default function NewTransaction() {
         lat: parseFloat(form.lat),
         lng: parseFloat(form.lng),
       });
-      setResult(data);
+      setResult(data.data);
     } catch (e) {
       setErr(e.response?.data?.error || "Failed to process transaction");
     } finally {
@@ -109,7 +109,8 @@ export default function NewTransaction() {
         </div>
 
         {result && (
-          <div className="card" style={{ animation: "slideUp 0.6s var(--transition-slow)", borderTop: "4px solid " + (result.prediction.isFraud ? "var(--danger)" : "var(--success)") }}>
+          <div className="card radar-card" style={{ borderTop: "4px solid " + (result.prediction.isFraud ? "var(--danger)" : "var(--success)") }}>
+            <div className="radar-content">
             <h3 style={{ marginBottom: "20px", fontSize: "1.1rem", display: "flex", alignItems: "center", gap: "10px" }}>
               <NewIcons.Shield /> Assessment Result
             </h3>
@@ -136,11 +137,11 @@ export default function NewTransaction() {
               </div>
             </div>
 
-            <h4 style={{ fontSize: "0.875rem", marginBottom: "16px", fontWeight: 800, color: "#1e293b" }}>Neural Network Contributors</h4>
+            <h4 style={{ fontSize: "0.875rem", marginBottom: "16px", fontWeight: 800, color: "var(--text-heading)" }}>Neural Network Contributors</h4>
             <div className="table-container" style={{ border: "1px solid var(--border-color)" }}>
               <table>
                 <thead>
-                  <tr style={{ background: "#f8fafc" }}><th>Feature Variable</th><th style={{ textAlign: "right" }}>Variance Impact</th></tr>
+                  <tr><th>Feature Variable</th><th style={{ textAlign: "right" }}>Variance Impact</th></tr>
                 </thead>
                 <tbody>
                   {Object.entries(result.prediction.contributions)
@@ -155,6 +156,7 @@ export default function NewTransaction() {
                     ))}
                 </tbody>
               </table>
+            </div>
             </div>
           </div>
         )}

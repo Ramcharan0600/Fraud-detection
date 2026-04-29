@@ -1,11 +1,13 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
 const connectDB = require("./config/db");
 const logger = require("./utils/logger");
 const responseHandler = require("./middleware/responseHandler");
+const { errorHandler } = require("./middleware/errorHandler");
 
 const authRoutes = require("./routes/authRoutes");
 const txRoutes = require("./routes/transactionRoutes");
@@ -15,7 +17,11 @@ const userRoutes = require("./routes/userRoutes");
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(helmet()); // Security headers
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+  credentials: true
+}));
 app.use(express.json({ limit: "5mb" }));
 app.use(morgan("combined", { stream: { write: (msg) => logger.info(msg.trim()) } }));
 app.use(responseHandler);
@@ -25,14 +31,14 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
   message: "Too many requests from this IP, please try again later.",
-  standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // limit each IP to 5 auth requests per windowMs
-  skipSuccessfulRequests: true, // Don't count successful requests
+  skipSuccessfulRequests: true,
   message: "Too many login attempts, please try again later.",
 });
 
@@ -41,6 +47,15 @@ app.use(limiter);
 // Health check
 app.get("/", (_req, res) => {
   res.success({ status: "ok", service: "fraud-detection-api" }, "Service is running");
+});
+
+// Health check for monitoring
+app.get("/health", (_req, res) => {
+  res.json({
+    status: "up",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
 });
 
 // API Routes
@@ -55,47 +70,35 @@ app.use((_req, res) => {
 });
 
 // Global error handler
-app.use((err, _req, res, _next) => {
-  logger.error("Unhandled error", { error: err.message, stack: err.stack });
-  
-  // Mongoose validation error
-  if (err.name === "ValidationError") {
-    const messages = Object.values(err.errors).map((e) => e.message);
-    return res.status(400).json({ success: false, error: "Validation error", details: messages });
-  }
+app.use(errorHandler);
 
-  // Mongoose duplicate key error
-  if (err.code === 11000) {
-    const field = Object.keys(err.keyPattern)[0];
-    return res.status(409).json({ success: false, error: `${field} already exists` });
-  }
+// Database connection and server startup
+const PORT = process.env.PORT || 5000;
 
-  // JWT errors
-  if (err.name === "JsonWebTokenError") {
-    return res.status(401).json({ success: false, error: "Invalid token" });
+async function startServer() {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      logger.info(`Server running on port ${PORT}`);
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    logger.error("Failed to start server", { error: err.message });
+    console.error("❌ Failed to start server:", err.message);
+    process.exit(1);
   }
+}
 
-  if (err.name === "TokenExpiredError") {
-    return res.status(401).json({ success: false, error: "Token expired" });
-  }
-
-  // Default error
-  res.status(err.status || 500).json({
-    success: false,
-    error: process.env.NODE_ENV === "production" ? "Server error" : err.message,
-  });
+// Handle graceful shutdown
+process.on("SIGTERM", () => {
+  logger.info("SIGTERM received, shutting down gracefully");
+  process.exit(0);
 });
 
-// Database and server startup
-const PORT = process.env.PORT || 5000;
-connectDB()
-  .then(() => {
-    logger.info(`Connected to MongoDB`);
-    app.listen(PORT, () => {
-      logger.info(`API running on http://localhost:${PORT}`);
-    });
-  })
-  .catch((err) => {
-    logger.error("Failed to connect to MongoDB", { error: err.message });
-    process.exit(1);
-  });
+process.on("SIGINT", () => {
+  logger.info("SIGINT received, shutting down gracefully");
+  process.exit(0);
+});
+
+startServer();
+
